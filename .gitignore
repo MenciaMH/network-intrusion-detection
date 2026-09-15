@@ -1,0 +1,27 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Datos (CICIDS2017 pesa varios GB, no debe subirse al repo)
+data/
+datasets/
+*.csv
+*.pcap
+
+# Modelos entrenados / checkpoints
+*.pt
+*.pth
+*.h5
+checkpoints/
+runs/
+
+# Sistema
+.DS_Store
+.env

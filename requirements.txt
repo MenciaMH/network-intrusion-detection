@@ -1,0 +1,40 @@
+# === BDAPP - Network Intrusion Detection (CICIDS2017, flow-to-image + CNN + Grad-CAM) ===
+# Instalar con: pip install -r requirements.txt
+
+# --- Manejo de datos ---
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1
+
+# --- Machine Learning clásico (baseline Random Forest) ---
+scikit-learn==1.5.1
+imbalanced-learn==0.12.3   # para el dataset desbalanceado (CICIDS2017)
+
+# --- Deep Learning (CNN sobre flow-to-image) ---
+torch==2.3.1
+torchvision==0.18.1
+torchsummary==1.5.1
+
+# --- Explicabilidad (Grad-CAM) ---
+grad-cam==1.5.4            # pytorch-grad-cam
+
+# --- Procesamiento de imágenes (flow-to-image encoding) ---
+Pillow==10.4.0
+opencv-python==4.10.0.84
+
+# --- Visualización ---
+matplotlib==3.9.1
+seaborn==0.13.2
+
+# --- Notebooks / entorno de trabajo ---
+jupyterlab==4.2.4
+notebook==7.2.1
+ipykernel==6.29.5
+
+# --- Utilidades ---
+tqdm==4.66.4
+pyyaml==6.0.1
+joblib==1.4.2
+
+# --- Descarga/gestión de datasets (opcional, útil para CICIDS2017) ---
+requests==2.32.3
