@@ -35,6 +35,7 @@ ipykernel==6.29.5
 tqdm==4.66.4
 pyyaml==6.0.1
 joblib==1.4.2
+pyarrow==17.0.0             # necesario para leer/escribir Parquet (dataset limpio)
 
 # --- Descarga/gestión de datasets (opcional, útil para CICIDS2017) ---
 requests==2.32.3
