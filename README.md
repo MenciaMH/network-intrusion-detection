@@ -39,6 +39,8 @@ Scripts in `scripts/` are numbered in the order they must run — each one reads
 | 4 | `4_train_test_split.py` | Stratified 80/20 train/test split by `Label`, fixed random seed. The test set is never touched again — it keeps the real, imbalanced distribution for honest evaluation. Output: `data/processed/train.parquet`, `data/processed/test.parquet`. |
 | 5 | `5_undersample_train.py` | Downsamples `BENIGN` in the training set to 350,000 rows (from ~1.7M); every other class is left untouched. Only applied to train, never to test. Output: `data/processed/train_undersampled.parquet`. |
 | 6 | `6_train_baseline_rf.py` | Trains a Random Forest baseline (`class_weight='balanced'`) on the undersampled train set, evaluates per-class precision/recall/F1 and a confusion matrix on the untouched test set, and flags classes with recall < 0.80 as SMOTE candidates for the next step. Output: `models/rf_baseline.joblib`, `data/processed/reports/`. |
+| 7 | `7_flow_to_image_encoding.py` | Encodes each flow into a small square grid for the CNN: pads the feature count up to the next perfect square, orders features by descending RF importance (from step 6) so neighboring grid cells are meaningfully related, fits a per-feature min-max scaler on train only, and stores compact `grid_size x grid_size` uint8 arrays (not pre-rendered 224x224 images -- the nearest-neighbor upscale to ResNet18's input size happens lazily at training time, never bilinear/bicubic, so no values are invented between features and Grad-CAM cells stay crisp). Output: `data/processed/flow_images/`. |
+| 8 | `8_train_cnn.py` | Fine-tunes an ImageNet-pretrained ResNet18 on the flow-image grids (upscaled lazily per-sample via `flow_image_dataset.py`'s `FlowImageDataset`, nearest-neighbor only), with class-weighted loss matching the RF baseline's approach, a stratified 90/10 train/val split for early stopping on validation macro-F1 (test stays untouched until the final evaluation), and per-epoch CSV logging. Output: `models/cnn_resnet18_best.pt`, `data/processed/reports/cnn_*`. |
 
 Run them in order:
 
@@ -49,7 +51,11 @@ python scripts/3_eda_report.py
 python scripts/4_train_test_split.py
 python scripts/5_undersample_train.py
 python scripts/6_train_baseline_rf.py
+python scripts/7_flow_to_image_encoding.py
+python scripts/8_train_cnn.py
 ```
+
+`scripts/flow_image_dataset.py` and `scripts/config.py` are shared modules imported by the numbered scripts, not run directly.
 
 ## Class balancing strategy
 
