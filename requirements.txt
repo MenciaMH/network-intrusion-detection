@@ -39,3 +39,8 @@ pyarrow==17.0.0             # necesario para leer/escribir Parquet (dataset limp
 
 # --- Descarga/gestión de datasets (opcional, útil para CICIDS2017) ---
 requests==2.32.3
+
+# --- RAG explainability layer (script 9: MITRE ATT&CK context, local LLM) ---
+sentence-transformers==3.0.1   # embeddings for ATT&CK technique retrieval
+transformers==4.44.2           # runs the local Qwen2.5-3B-Instruct model
+accelerate==0.33.0             # device_map="auto" / dtype handling for transformers

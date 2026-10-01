@@ -69,6 +69,51 @@ CNN_WEIGHT_DECAY = 1e-4
 CNN_MAX_EPOCHS = 30
 CNN_EARLY_STOPPING_PATIENCE = 5  # epochs without val macro-F1 improvement
 
+# RAG explainability layer (script 9): grounds each CNN prediction in the
+# real MITRE ATT&CK knowledge base instead of letting an LLM free-associate
+# about "what a PortScan is". Retrieval-only step (7-8) needs no GPU and no
+# API key; generation (Qwen2.5-3B-Instruct, local, free) benefits from GPU
+# but runs on CPU too, just slower.
+ATTACK_DIR = os.path.join(PROCESSED_DIR, "attack_context")
+ATTACK_STIX_URL = (
+    "https://raw.githubusercontent.com/mitre/cti/master/"
+    "enterprise-attack/enterprise-attack.json"
+)
+ATTACK_STIX_PATH = os.path.join(ATTACK_DIR, "enterprise-attack.json")
+ATTACK_TECHNIQUES_PATH = os.path.join(ATTACK_DIR, "attack_techniques.json")
+ATTACK_EMBEDDINGS_PATH = os.path.join(ATTACK_DIR, "attack_technique_embeddings.npy")
+
+RAG_EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # sentence-transformers, CPU-friendly
+RAG_LLM_MODEL = "Qwen/Qwen2.5-3B-Instruct"  # Apache-2.0, ungated, free, local
+RAG_TOP_K = 3  # ATT&CK techniques retrieved per prediction
+RAG_EXPLANATIONS_PATH = os.path.join(REPORTS_DIR, "rag_attack_explanations.json")
+
+# Maps each of the CNN's 11 output classes to a natural-language query used
+# to retrieve semantically related ATT&CK techniques -- the class label
+# alone ("PortScan") retrieves worse than a short behavioral description,
+# since ATT&CK technique text is written in analyst language, not CICIDS2017
+# label vocabulary. BENIGN is intentionally absent: there's no attack to
+# explain, so it's skipped upstream rather than given an empty explanation.
+RAG_CLASS_QUERIES = {
+    # Deliberately NOT "botnet ... beaconing" -- that phrasing retrieved
+    # ATT&CK's "Botnet" technique (T1583.005/T1584.005), which is filed
+    # under resource-development (an adversary acquiring/renting botnet
+    # infrastructure BEFORE an attack), not an already-compromised host
+    # talking to its controller, which is what this CICIDS2017 class
+    # actually captures. Rephrased toward command-and-control-tactic
+    # language instead.
+    "Bot": "command and control beaconing malicious network communication compromised host",
+    "DDoS": "distributed denial of service network flooding endpoint impact availability",
+    "DoS GoldenEye": "denial of service http flood application layer attack availability",
+    "DoS Hulk": "denial of service http flood application layer attack availability",
+    "DoS Slowhttptest": "slow denial of service low bandwidth application layer attack",
+    "DoS slowloris": "slow denial of service low bandwidth application layer attack",
+    "FTP-Patator": "brute force credential guessing ftp login attack",
+    "PortScan": "network service scanning discovery reconnaissance",
+    "SSH-Patator": "brute force credential guessing ssh login attack",
+    "Web Attack": "web application attack exploit public facing application injection",
+}
+
 # --------------------------------------------------------------------------- #
 # Shared constants
 # --------------------------------------------------------------------------- #
