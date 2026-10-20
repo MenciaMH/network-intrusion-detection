@@ -42,8 +42,8 @@ def load_one_csv(path: str) -> pd.DataFrame:
     df = clean_columns(df)
 
     # CICIDS2017 CSVs have Infinity and NaN values in ratio columns
-    # (e.g. Flow Bytes/s, Flow Packets/s). Replace them with NaN so they
-    # can be handled consistently later on.
+    # Replacing them with NaN so they can be handled consistently
+    # later on.
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     df = downcast_dtypes(df)

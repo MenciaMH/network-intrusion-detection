@@ -42,8 +42,8 @@ across the whole week):
                                     (CICIDS2017 is known to ship a few all-zero
                                     columns, e.g. some flag counters).
     9. Duplicate columns         -> columns that are exact copies of another
-                                    column (same values in every row) are dropped,
-                                    keeping only the first occurrence.
+                                    column are dropped, keeping only the 
+                                    first occurrence.
    10. Dtype confirmation        -> asserts that every column except Label is
                                     numeric, so nothing unexpected slipped through.
    11. Final checkpoint          -> asserts zero remaining NaNs and zero remaining
@@ -53,7 +53,7 @@ The cleaned data is written out as one Parquet file (much smaller and faster
 to reload than CSV).
 
 Usage:
-    python clean_data.py
+    python3 2_data_cleaning.py
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ OUTPUT_PATH = config.CLEANED_DATA_PATH
 LABEL_COLUMN = config.LABEL_COLUMN
 
 # Labels excluded entirely: too few samples for a meaningful train/test split,
-# and not related in traffic pattern to any other class (see module docstring).
+# and not related in traffic pattern to any other class (see module docstring)
 EXCLUDED_LABELS = {"Heartbleed", "Infiltration"}
 
 # Any label containing one of these keywords is a Web Attack subtype and gets
@@ -266,7 +266,7 @@ def main() -> None:
 
     print("\nConcatenating all cleaned files...")
     full_df = pd.concat(cleaned_frames, ignore_index=True)
-    del cleaned_frames  # free memory before writing to disk
+    del cleaned_frames
 
     print("\nRunning whole-dataset checks (need the full data, not per-file):")
     full_df = drop_constant_columns(full_df)

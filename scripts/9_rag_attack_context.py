@@ -143,7 +143,7 @@ def parse_attack_techniques() -> list[dict]:
                 technique_id = ref.get("external_id")
                 break
         if technique_id is None:
-            continue  # shouldn't happen for a real technique, but be defensive
+            continue  # shouldn't happen for a real technique, but be defensive 
 
         tactics = []
         for phase in obj.get("kill_chain_phases", []):

@@ -14,7 +14,7 @@ random split could by chance leave very few (or very many) of their samples
 in one of the two sets.
 
 Usage:
-    python split_data.py
+    python3 4_train_test_split.py
 """
 
 from __future__ import annotations

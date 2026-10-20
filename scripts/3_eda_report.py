@@ -1,10 +1,10 @@
 """
 Exploratory data analysis (EDA) on the cleaned CICIDS2017 dataset.
 
-Run this AFTER clean_data.py (needs the updated cicids2017_clean.parquet,
+Running this AFTER clean_data.py (needs the updated cicids2017_clean.parquet,
 with constant/duplicate columns already removed) and BEFORE training any
 model. The goal is to build trust in the data before spending compute on a
-baseline, and to produce material for the written report.
+baseline.
 
 Produces, in data/processed/eda/:
     - class_distribution.png   bar chart of class counts (log scale y-axis,
@@ -23,7 +23,7 @@ Also prints to the console:
       this is scaffolding, not a finished summary)
 
 Usage:
-    python eda_report.py
+    python3 3_eda_report.py
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ import os
 
 import matplotlib
 
-matplotlib.use("Agg")  # no display needed, just save files
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -55,7 +55,7 @@ LABEL_COLUMN = config.LABEL_COLUMN
 
 # A feature where one value covers this much of the data isn't a hard
 # constant (already handled in clean_data.py) but is worth flagging as
-# "almost always the same value" -- e.g. a flag that's 0 in 99.9% of flows.
+# "almost always the same value"
 NEAR_CONSTANT_THRESHOLD = 0.99
 
 # Feature pairs with |correlation| above this are flagged as redundancy
