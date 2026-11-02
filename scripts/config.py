@@ -1,8 +1,13 @@
 """
 Shared configuration for the BDAPP NIDS pipeline scripts.
 
-Importing from here instead of redefining paths/constants in every script, so
-a change only has to happen in one place instead of many.
+Import from here instead of redefining paths/constants in every script, so
+a change -- e.g. moving data/processed/ elsewhere, or changing the random
+seed -- only has to happen in one place instead of six.
+
+This file lives in scripts/, alongside the numbered pipeline scripts, and
+is imported as a plain local module (`import config`) since Python adds a
+script's own directory to sys.path when it's run directly.
 """
 
 import os
@@ -14,13 +19,18 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "MachineLearningCVE")
+# Adjust this if your unzipped folder is named differently (the CIC zip is
+# called "MachineLearningCSV.zip" but the folder inside it is sometimes
+# named "MachineLearningCVE").
 
 PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
 EDA_DIR = os.path.join(PROCESSED_DIR, "eda")
 REPORTS_DIR = os.path.join(PROCESSED_DIR, "reports")
 MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
 
-# Pipeline artifact filenames
+# Pipeline artifact filenames. These are each written by one script and
+# read by one or more later scripts, so they live here to guarantee every
+# script agrees on the same filename.
 CLEANED_DATA_PATH = os.path.join(PROCESSED_DIR, "cicids2017_clean.parquet")
 TRAIN_PATH = os.path.join(PROCESSED_DIR, "train.parquet")
 TEST_PATH = os.path.join(PROCESSED_DIR, "test.parquet")
@@ -103,6 +113,26 @@ RAG_CLASS_QUERIES = {
     "SSH-Patator": "brute force credential guessing ssh login attack",
     "Web Attack": "web application attack exploit public facing application injection",
 }
+
+# Grad-CAM explainability pass (script 10): diagnostic, not a fix. Per the
+# Work log (Sections 15-16), BENIGN leaks into every attack class, most
+# visibly wrecking precision for Bot, Web Attack, and PortScan -- Grad-CAM
+# shows WHICH grid cells (-> which original features) the CNN weighted most
+# heavily when it made those specific wrong predictions, so any later
+# class-weight/feature fix is evidence-based instead of a guess.
+GRADCAM_HEATMAP_DIR = os.path.join(REPORTS_DIR, "gradcam_heatmaps")
+GRADCAM_SUMMARY_CSV = os.path.join(REPORTS_DIR, "gradcam_feature_importance_summary.csv")
+
+# The three confusions actually documented as the problem (Section 15) --
+# not every possible BENIGN->X pair, since those three are what wrecked
+# precision visibly enough to need explaining.
+GRADCAM_CONFUSION_PAIRS = [
+    ("BENIGN", "Bot"),
+    ("BENIGN", "Web Attack"),
+    ("BENIGN", "PortScan"),
+]
+GRADCAM_SAMPLES_PER_CONFUSION = 25  # misclassified test flows averaged per pair
+GRADCAM_TOP_N_FEATURES = 10  # how many top-driving features to report per pair
 
 # --------------------------------------------------------------------------- #
 # Shared constants

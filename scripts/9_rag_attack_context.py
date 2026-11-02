@@ -369,6 +369,8 @@ def main() -> None:
 
     print(f"\nSaved {len(results)} explanation(s) to: {RAG_EXPLANATIONS_PATH}")
 
+    print("\nDone.")
+
 
 if __name__ == "__main__":
     main()
