@@ -173,6 +173,21 @@ BASELINE_PRECISION_REFERENCE = {
     "PortScan": 0.74,
 }
 
+# Grad-CAM fidelity + stability pass (script 13): Section 19/VII-D reports
+# WHICH features Grad-CAM ranks as driving each BENIGN->X confusion, but
+# never checks whether that ranking is (a) causally real -- does removing
+# those features actually change the wrong prediction, not just correlate
+# with it -- or (b) stable -- would a different sample of misclassified
+# flows have produced a different top-10. Udurume et al. (Sci. Rep., 2026)
+# validate their SHAP rankings with exactly these two checks (feature
+# masking for fidelity, bootstrap Jaccard overlap for stability); this
+# applies the same two checks to the Grad-CAM rankings already computed by
+# script 10, instead of leaving them as an unvalidated "future work" note.
+GRADCAM_FIDELITY_TOP_K_LIST = [3, 5, 10]  # how many top-ranked features to mask at once
+GRADCAM_FIDELITY_STABILITY_CSV = os.path.join(REPORTS_DIR, "gradcam_fidelity_stability.csv")
+GRADCAM_STABILITY_N_BOOTSTRAPS = 5  # matches Udurume et al.'s 5 bootstrapped subsets
+GRADCAM_STABILITY_TOP_N = 10  # size of the feature set compared across bootstraps
+
 # --------------------------------------------------------------------------- #
 # Shared constants
 # --------------------------------------------------------------------------- #
