@@ -134,6 +134,45 @@ GRADCAM_CONFUSION_PAIRS = [
 GRADCAM_SAMPLES_PER_CONFUSION = 25  # misclassified test flows averaged per pair
 GRADCAM_TOP_N_FEATURES = 10  # how many top-driving features to report per pair
 
+# Fine-tune pass (script 11): NOT a retrain from scratch -- continues from the
+# epoch-28 checkpoint (Section 15/19 of the Work log) with one change: BENIGN's
+# class weight is raised. Grad-CAM (script 10) confirmed real timing-feature
+# overlap between some BENIGN flows and Bot/Web Attack/PortScan, but also that
+# BENIGN's weight (0.179) was a clear outlier -- 2.5x lower than the next
+# class (DoS Hulk, 0.454) -- which made misclassifying BENIGN artificially
+# "cheap" for the weighted loss. This multiplier brings BENIGN roughly in
+# line with DoS Hulk instead of leaving it as the obvious outlier, without
+# overcorrecting into making BENIGN itself too expensive to get wrong (which
+# would just trade false negatives on attacks for false positives on BENIGN).
+BENIGN_CLASS_NAME = "BENIGN"
+BENIGN_WEIGHT_MULTIPLIER = 2.5  # 0.179 -> ~0.45, in line with DoS Hulk's 0.454
+
+# Lower LR than the original 1e-4 -- this is a short fine-tune of an already
+# well-trained model, not training from scratch, so a large step risks
+# undoing the 28 epochs of convergence already achieved. Fewer max epochs and
+# shorter patience for the same reason: either this helps within a handful of
+# epochs, or it's not going to without a different intervention.
+CNN_FINETUNE_LEARNING_RATE = CNN_LEARNING_RATE / 10  # 1e-5
+CNN_FINETUNE_MAX_EPOCHS = 10
+CNN_FINETUNE_PATIENCE = 3
+
+# Separate output files -- the fine-tune must never overwrite the original
+# epoch-28 checkpoint/report, since Section 15's documented baseline numbers
+# need to stay reproducible for direct before/after comparison.
+CNN_FINETUNE_MODEL_PATH = os.path.join(MODELS_DIR, "cnn_resnet18_finetuned_benign_weight.pt")
+CNN_FINETUNE_TRAINING_LOG_CSV = os.path.join(REPORTS_DIR, "cnn_finetune_training_log.csv")
+CNN_FINETUNE_CLASSIFICATION_REPORT_CSV = os.path.join(REPORTS_DIR, "cnn_finetune_classification_report.csv")
+CNN_FINETUNE_CONFUSION_MATRIX_PNG = os.path.join(REPORTS_DIR, "cnn_finetune_confusion_matrix.png")
+CNN_FINETUNE_TRAINING_CURVES_PNG = os.path.join(REPORTS_DIR, "cnn_finetune_training_curves.png")
+
+# The documented baseline (Section 15) to print a direct before/after against
+# for exactly the three classes Grad-CAM (Section 19) analyzed.
+BASELINE_PRECISION_REFERENCE = {
+    "Bot": 0.15,
+    "Web Attack": 0.22,
+    "PortScan": 0.74,
+}
+
 # --------------------------------------------------------------------------- #
 # Shared constants
 # --------------------------------------------------------------------------- #
