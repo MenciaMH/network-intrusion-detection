@@ -8,6 +8,24 @@ The full report (methodology, results, discussion, and a pipeline diagram) is in
 
 > **Scope note:** this is supervised classification of *known* attack categories. It is explicitly **not** zero-day / anomaly detection.
 
+## Results
+
+The CNN reached a macro-averaged F1-score of 0.84 (0.85 after the fine-tune below), with recall ≥0.95 on every class — it misses almost nothing. The real weakness was precision on the rare classes, caused by benign traffic leaking into them:
+
+![Confusion matrix of the CNN on the test set](docs/results/confusion_matrix.png)
+
+Grad-CAM traced this to timing-based features (inter-arrival time, idle/active periods) driving all three benign confusions:
+
+![Top-10 Grad-CAM features per confusion pair](docs/results/gradcam_top10_grid.png)
+
+That ranking was then validated, not just visualized: a feature-masking fidelity check (script 13, following Udurume et al., *Sci. Rep.* 2026) zeroes the top-10 ranked features and re-evaluates the real checkpoint. The predictions flip **98.9%** of the time for Web Attack and **90.1%** for PortScan — but only **15.6%** for Bot, with the rankings themselves stable across bootstrap resamples (mean Jaccard overlap 0.79–1.00 across 5 resamples).
+
+That split matches a targeted fine-tune tested beforehand: raising BENIGN's class weight (×2.5) cut Bot's benign-confusion count by 46% — but left Web Attack and PortScan completely unchanged, confirming their errors are a genuine feature overlap rather than a fixable class-weighting artifact:
+
+![Benign misclassifications before and after the fine-tune](docs/results/benign_misclassifications_before_after.png)
+
+Full per-class metrics, the RAG/MITRE ATT&CK retrieval table, and the full discussion of limitations are in [`BDAPP_Final_Report.docx`](./BDAPP_Final_Report.docx).
+
 ## Pipeline overview
 
 ```
